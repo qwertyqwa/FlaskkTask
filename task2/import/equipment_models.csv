@@ -1,0 +1,49 @@
+equipment_type_name,name,manufacturer
+Кондиционер,LG S12EQ,LG
+Кондиционер,LG FTXB,LG
+Кондиционер,Daikin S12EQ,Daikin
+Кондиционер,Daikin FTXB,Daikin
+Кондиционер,Mitsubishi S12EQ,Mitsubishi
+Кондиционер,Mitsubishi FTXB,Mitsubishi
+Вентиляция,VentPro 2000,VentPro
+Вентиляция,VentPro 3000,VentPro
+Вентиляция,Systemair 2000,Systemair
+Вентиляция,Systemair 3000,Systemair
+Вентиляция,Vents 2000,Vents
+Вентиляция,Vents 3000,Vents
+Обогреватель,Ballu BEC,Ballu
+Обогреватель,Ballu TCH,Ballu
+Обогреватель,Timberk BEC,Timberk
+Обогреватель,Timberk TCH,Timberk
+Обогреватель,Electrolux BEC,Electrolux
+Обогреватель,Electrolux TCH,Electrolux
+Увлажнитель,Boneco W200,Boneco
+Увлажнитель,Boneco LW25,Boneco
+Увлажнитель,Venta W200,Venta
+Увлажнитель,Venta LW25,Venta
+Увлажнитель,Stadler W200,Stadler
+Увлажнитель,Stadler LW25,Stadler
+Осушитель,Master DH,Master
+Осушитель,Master BD,Master
+Осушитель,Trotec DH,Trotec
+Осушитель,Trotec BD,Trotec
+Осушитель,Ballu DH,Ballu
+Осушитель,Ballu BD,Ballu
+Тепловой насос,Mitsubishi Zubadan,Mitsubishi
+Тепловой насос,Mitsubishi Altherma,Mitsubishi
+Тепловой насос,Daikin Zubadan,Daikin
+Тепловой насос,Daikin Altherma,Daikin
+Тепловой насос,LG Zubadan,LG
+Тепловой насос,LG Altherma,LG
+Чиллер,Carrier 30XA,Carrier
+Чиллер,Carrier YCIV,Carrier
+Чиллер,York 30XA,York
+Чиллер,York YCIV,York
+Чиллер,Trane 30XA,Trane
+Чиллер,Trane YCIV,Trane
+Фанкойл,Carrier 42MV,Carrier
+Фанкойл,Carrier 40RM,Carrier
+Фанкойл,York 42MV,York
+Фанкойл,York 40RM,York
+Фанкойл,Daikin 42MV,Daikin
+Фанкойл,Daikin 40RM,Daikin

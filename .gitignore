@@ -8,3 +8,5 @@ venv/
 node_modules/
 .idea/
 .js
+task2/*.sqlite3
+task2/backups/*.sqlite3

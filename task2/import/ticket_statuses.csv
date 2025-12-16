@@ -1,0 +1,5 @@
+code,name,is_final
+open,Открыта,0
+in_repair,В процессе ремонта,0
+waiting_parts,Ожидание комплектующих,0
+completed,Завершена,1

@@ -1,0 +1,19 @@
+username,password,full_name,role_code,is_active
+admin,admin,Администратор,admin,1
+operator,operator,Оператор,operator,1
+specialist,specialist,Специалист,specialist,1
+operator1,operator,Оператор 1,operator,1
+operator2,operator,Оператор 2,operator,1
+operator3,operator,Оператор 3,operator,1
+operator4,operator,Оператор 4,operator,1
+operator5,operator,Оператор 5,operator,1
+specialist1,specialist,Специалист 1,specialist,1
+specialist2,specialist,Специалист 2,specialist,1
+specialist3,specialist,Специалист 3,specialist,1
+specialist4,specialist,Специалист 4,specialist,1
+specialist5,specialist,Специалист 5,specialist,1
+specialist6,specialist,Специалист 6,specialist,1
+specialist7,specialist,Специалист 7,specialist,1
+specialist8,specialist,Специалист 8,specialist,1
+specialist9,specialist,Специалист 9,specialist,1
+specialist10,specialist,Специалист 10,specialist,1
