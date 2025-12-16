@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="title">Список заявок</h1>
+
+  <form class="card form form--inline" method="get" action="{{ url_for('tickets.list_tickets') }}">
+    <label class="field field--inline">
+      <span class="field__label">Поиск</span>
+      <input class="input" name="q" value="{{ q }}" placeholder="Номер / ФИО / телефон / модель" />
+    </label>
+
+    <label class="field field--inline">
+      <span class="field__label">Статус</span>
+      <select class="input" name="status">
+        <option value="">Все</option>
+        {% for option in status_options %}
+          <option value="{{ option.value }}" {% if option.value == selected_status %}selected{% endif %}>
+            {{ option.label }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    {% if g.user["role"] in ["admin", "operator"] %}
+      <label class="field field--inline">
+        <span class="field__label">Специалист</span>
+        <select class="input" name="specialist_id">
+          <option value="">Любой</option>
+          {% for sp in specialists %}
+            <option value="{{ sp['id'] }}" {% if (sp['id'] | string) == selected_specialist_id %}selected{% endif %}>
+              {{ sp['full_name'] }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endif %}
+
+    <label class="field field--inline">
+      <span class="field__label">С</span>
+      <input class="input" type="date" name="date_from" value="{{ date_from }}" />
+    </label>
+
+    <label class="field field--inline">
+      <span class="field__label">По</span>
+      <input class="input" type="date" name="date_to" value="{{ date_to }}" />
+    </label>
+
+    <div class="actions actions--inline">
+      <button class="btn" type="submit">Искать</button>
+      <a class="btn btn--ghost" href="{{ url_for('tickets.list_tickets') }}">Сброс</a>
+    </div>
+  </form>
+
+  {% if tickets %}
+    <div class="card">
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Номер</th>
+              <th>Дата</th>
+              <th>Оборудование</th>
+              <th>Клиент</th>
+              <th>Телефон</th>
+              <th>Статус</th>
+              <th>Специалист</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tickets %}
+              <tr>
+                <td><a href="{{ url_for('tickets.view_ticket', ticket_id=t['id']) }}">{{ t["request_number"] }}</a></td>
+                <td>{{ format_datetime(t["created_at"]) }}</td>
+                <td>{{ t["equipment_type"] }} / {{ t["device_model"] }}</td>
+                <td>{{ t["customer_full_name"] }}</td>
+                <td>{{ t["customer_phone"] }}</td>
+                <td><span class="pill pill--{{ t['status'] }}">{{ status_labels[t["status"]] }}</span></td>
+                <td>{{ t["specialist_name"] or "—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="card">
+      <p class="muted">Заявок пока нет.</p>
+      {% if g.user["role"] in ["admin", "operator"] %}
+        <a class="btn" href="{{ url_for('tickets.create_ticket') }}">Создать первую заявку</a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
+

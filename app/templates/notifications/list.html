@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="title-row">
+    <h1 class="title">Уведомления</h1>
+    <a class="btn btn--ghost" href="{{ url_for('tickets.list_tickets') }}">Назад</a>
+  </div>
+
+  <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+    <button class="btn" type="submit">Отметить все прочитанными</button>
+  </form>
+
+  <div class="card">
+    {% if notifications %}
+      <ul class="list">
+        {% for n in notifications %}
+          <li class="list__item {% if not n['is_read'] %}list__item--unread{% endif %}">
+            <div class="list__meta">
+              {% if n["request_number"] %}
+                <a href="{{ url_for('tickets.view_ticket', ticket_id=n['ticket_id']) }}">{{ n["request_number"] }}</a>
+                •
+              {% endif %}
+              {{ format_datetime(n["created_at"]) }}
+            </div>
+            <div>{{ n["message"] }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Уведомлений нет.</p>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="title">Страница не найдена</h1>
+  <div class="card">
+    <p>Проверьте адрес или вернитесь к списку заявок.</p>
+    <a class="btn" href="{{ url_for('tickets.list_tickets') }}">К заявкам</a>
+  </div>
+{% endblock %}
+

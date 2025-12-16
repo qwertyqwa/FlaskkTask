@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="title">Доступ запрещен</h1>
+  <div class="card">
+    <p>У вас нет прав для выполнения этого действия.</p>
+    <a class="btn" href="{{ url_for('tickets.list_tickets') }}">На главную</a>
+  </div>
+{% endblock %}
+

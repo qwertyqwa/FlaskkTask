@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="title-row">
+    <h1 class="title">Создание пользователя</h1>
+    <a class="btn btn--ghost" href="{{ url_for('admin.users_list') }}">Назад</a>
+  </div>
+
+  <form class="card form" method="post" action="{{ url_for('admin.users_new') }}">
+    <label class="field">
+      <span class="field__label">Логин</span>
+      <input class="input" name="username" required value="{{ form.get('username', '') }}" />
+    </label>
+
+    <label class="field">
+      <span class="field__label">ФИО</span>
+      <input class="input" name="full_name" required value="{{ form.get('full_name', '') }}" />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Роль</span>
+      <select class="input" name="role" required>
+        <option value="">Выберите роль</option>
+        {% for key, label in role_labels.items() %}
+          <option value="{{ key }}" {% if form.get('role', '') == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Пароль</span>
+      <input class="input" type="password" name="password" required minlength="4" />
+    </label>
+
+    <div class="actions">
+      <button class="btn" type="submit">Создать</button>
+      <a class="btn btn--ghost" href="{{ url_for('admin.users_list') }}">Отмена</a>
+    </div>
+  </form>
+{% endblock %}
+

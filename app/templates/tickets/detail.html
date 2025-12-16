@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="title-row">
+    <h1 class="title">Заявка {{ ticket["request_number"] }}</h1>
+    <a class="btn btn--ghost" href="{{ url_for('tickets.list_tickets') }}">Назад</a>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2 class="subtitle">Данные заявки</h2>
+      <dl class="dl">
+        <div class="dl__row"><dt>Дата добавления</dt><dd>{{ format_datetime(ticket["created_at"]) }}</dd></div>
+        <div class="dl__row"><dt>Статус</dt><dd><span class="pill pill--{{ ticket['status'] }}">{{ status_labels[ticket["status"]] }}</span></dd></div>
+        <div class="dl__row"><dt>Тип оборудования</dt><dd>{{ ticket["equipment_type"] }}</dd></div>
+        <div class="dl__row"><dt>Модель</dt><dd>{{ ticket["device_model"] }}</dd></div>
+        <div class="dl__row"><dt>Описание проблемы</dt><dd class="pre">{{ ticket["problem_description"] }}</dd></div>
+        <div class="dl__row"><dt>ФИО заказчика</dt><dd>{{ ticket["customer_full_name"] }}</dd></div>
+        <div class="dl__row"><dt>Телефон</dt><dd>{{ ticket["customer_phone"] }}</dd></div>
+        <div class="dl__row"><dt>Ответственный</dt><dd>{{ ticket["specialist_name"] or "—" }}</dd></div>
+        <div class="dl__row"><dt>Дата завершения</dt><dd>{{ format_datetime(ticket["completed_at"]) or "—" }}</dd></div>
+      </dl>
+
+      {% if g.user["role"] in ["admin", "operator"] %}
+        <div class="actions">
+          <a class="btn" href="{{ url_for('tickets.edit_ticket', ticket_id=ticket['id']) }}">Редактировать</a>
+          {% if g.user["role"] == "admin" %}
+            <form method="post" action="{{ url_for('tickets.delete_ticket', ticket_id=ticket['id']) }}"
+                  onsubmit="return confirm('Удалить заявку {{ ticket['request_number'] }}? Действие необратимо.');">
+              <button class="btn btn--danger" type="submit">Удалить</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
+    </section>
+
+    {% if can_work %}
+      <section class="card">
+        <h2 class="subtitle">Работа по заявке</h2>
+
+        <form class="form form--stack" method="post" action="{{ url_for('tickets.update_status', ticket_id=ticket['id']) }}">
+          <label class="field">
+            <span class="field__label">Изменить статус</span>
+            <select class="input" name="status" required>
+              {% for option in status_options %}
+                {% if not (g.user["role"] == "specialist" and option.value == "open") %}
+                  <option value="{{ option.value }}" {% if option.value == ticket["status"] %}selected{% endif %}>
+                    {{ option.label }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </label>
+          <button class="btn" type="submit">Сохранить статус</button>
+        </form>
+
+        <hr class="hr" />
+
+        <form class="form form--stack" method="post" action="{{ url_for('tickets.add_comment', ticket_id=ticket['id']) }}">
+          <label class="field">
+            <span class="field__label">Комментарий</span>
+            <textarea class="input" name="body" rows="3" placeholder="Комментарий специалиста/оператора" required></textarea>
+          </label>
+          <button class="btn" type="submit">Добавить комментарий</button>
+        </form>
+
+        <hr class="hr" />
+
+        <form class="form form--stack" method="post" action="{{ url_for('tickets.add_part', ticket_id=ticket['id']) }}">
+          <label class="field">
+            <span class="field__label">Комплектующая</span>
+            <input class="input" name="part_name" placeholder="Например: датчик температуры" required />
+          </label>
+          <label class="field">
+            <span class="field__label">Количество</span>
+            <input class="input" name="quantity" type="number" min="1" value="1" required />
+          </label>
+          <button class="btn" type="submit">Зафиксировать комплектующую</button>
+        </form>
+      </section>
+    {% endif %}
+  </div>
+
+  <section class="card">
+    <h2 class="subtitle">Комментарии</h2>
+    {% if comments %}
+      <ul class="list">
+        {% for c in comments %}
+          <li class="list__item">
+            <div class="list__meta">
+              <strong>{{ c["full_name"] }}</strong> • {{ format_datetime(c["created_at"]) }}
+            </div>
+            <div class="pre">{{ c["body"] }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Комментариев нет.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2 class="subtitle">Комплектующие</h2>
+    {% if parts %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Наименование</th>
+              <th>Кол-во</th>
+              <th>Кто добавил</th>
+              <th>Дата</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in parts %}
+              <tr>
+                <td>{{ p["part_name"] }}</td>
+                <td>{{ p["quantity"] }}</td>
+                <td>{{ p["full_name"] }}</td>
+                <td>{{ format_datetime(p["created_at"]) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">Комплектующие не фиксировались.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2 class="subtitle">История изменений</h2>
+    {% if history %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Пользователь</th>
+              <th>Было</th>
+              <th>Стало</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in history %}
+              <tr>
+                <td>{{ format_datetime(h["changed_at"]) }}</td>
+                <td>{{ h["full_name"] }}</td>
+                <td>{{ status_labels.get(h["old_status"], "—") }}</td>
+                <td>{{ status_labels.get(h["new_status"], "—") }}</td>
+                <td>{{ h["comment"] or "—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">История пуста.</p>
+    {% endif %}
+  </section>
+{% endblock %}

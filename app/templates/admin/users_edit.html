@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="title-row">
+    <h1 class="title">Пользователь {{ user["username"] }}</h1>
+    <a class="btn btn--ghost" href="{{ url_for('admin.users_list') }}">Назад</a>
+  </div>
+
+  <form class="card form" method="post" action="{{ url_for('admin.users_edit', user_id=user['id']) }}">
+    <label class="field">
+      <span class="field__label">ФИО</span>
+      <input class="input" name="full_name" required value="{{ user['full_name'] }}" />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Роль</span>
+      <select class="input" name="role" required>
+        {% for key, label in role_labels.items() %}
+          <option value="{{ key }}" {% if user['role'] == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Активен</span>
+      <input type="checkbox" name="is_active" {% if user["is_active"] %}checked{% endif %} />
+      <span class="hint">Снимите галочку, чтобы заблокировать пользователя.</span>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Новый пароль (опционально)</span>
+      <input class="input" type="password" name="password" minlength="4" placeholder="Оставьте пустым, чтобы не менять" />
+    </label>
+
+    <div class="actions">
+      <button class="btn" type="submit">Сохранить</button>
+      <a class="btn btn--ghost" href="{{ url_for('admin.users_list') }}">Отмена</a>
+    </div>
+  </form>
+{% endblock %}
+

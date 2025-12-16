@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="title">Создание заявки</h1>
+
+  <form class="card form" method="post" action="{{ url_for('tickets.create_ticket') }}">
+    <label class="field">
+      <span class="field__label">Тип оборудования</span>
+      <input class="input" name="equipment_type" required value="{{ form.get('equipment_type', '') }}" placeholder="Кондиционер / вентиляция и т.д." />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Модель устройства</span>
+      <input class="input" name="device_model" required value="{{ form.get('device_model', '') }}" placeholder="Например: LG S12EQ" />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Описание проблемы</span>
+      <textarea class="input" name="problem_description" required rows="4" placeholder="Опишите симптомы">{{ form.get('problem_description', '') }}</textarea>
+    </label>
+
+    <label class="field">
+      <span class="field__label">ФИО заказчика</span>
+      <input class="input" name="customer_full_name" required value="{{ form.get('customer_full_name', '') }}" placeholder="Иванов Иван Иванович" />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Телефон</span>
+      <input class="input" name="customer_phone" required value="{{ form.get('customer_phone', '') }}" placeholder="+7 (999) 123-45-67" />
+      <span class="hint">Допустимые символы: цифры, +, пробел, -, скобки.</span>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Ответственный специалист (опционально)</span>
+      <select class="input" name="assigned_specialist_id">
+        <option value="">Не назначать</option>
+        {% for sp in specialists %}
+          <option value="{{ sp['id'] }}" {% if (form.get('assigned_specialist_id', '') | string) == (sp['id'] | string) %}selected{% endif %}>
+            {{ sp["full_name"] }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <div class="actions">
+      <button class="btn" type="submit">Создать</button>
+      <a class="btn btn--ghost" href="{{ url_for('tickets.list_tickets') }}">Назад</a>
+    </div>
+  </form>
+{% endblock %}
+

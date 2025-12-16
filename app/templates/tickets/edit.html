@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="title-row">
+    <h1 class="title">Редактирование заявки {{ ticket["request_number"] }}</h1>
+    <a class="btn btn--ghost" href="{{ url_for('tickets.view_ticket', ticket_id=ticket['id']) }}">Назад</a>
+  </div>
+
+  <form class="card form" method="post" action="{{ url_for('tickets.edit_ticket', ticket_id=ticket['id']) }}">
+    <label class="field">
+      <span class="field__label">Статус</span>
+      <select class="input" name="status" required>
+        {% for option in status_options %}
+          <option value="{{ option.value }}" {% if option.value == ticket["status"] %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Ответственный специалист</span>
+      <select class="input" name="assigned_specialist_id">
+        <option value="">Не назначен</option>
+        {% for sp in specialists %}
+          <option value="{{ sp['id'] }}" {% if ticket["assigned_specialist_id"] == sp["id"] %}selected{% endif %}>
+            {{ sp["full_name"] }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Описание проблемы</span>
+      <textarea class="input" name="problem_description" rows="5" required>{{ ticket["problem_description"] }}</textarea>
+    </label>
+
+    <div class="actions">
+      <button class="btn" type="submit">Сохранить</button>
+      <a class="btn btn--ghost" href="{{ url_for('tickets.view_ticket', ticket_id=ticket['id']) }}">Отмена</a>
+    </div>
+  </form>
+{% endblock %}
+

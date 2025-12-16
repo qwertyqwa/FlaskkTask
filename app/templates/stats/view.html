@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="title">Статистика</h1>
+
+  <form class="card form form--inline" method="get" action="{{ url_for('stats.stats_view') }}">
+    <label class="field field--inline">
+      <span class="field__label">С</span>
+      <input class="input" type="date" name="date_from" value="{{ date_from }}" required />
+    </label>
+    <label class="field field--inline">
+      <span class="field__label">По</span>
+      <input class="input" type="date" name="date_to" value="{{ date_to }}" required />
+    </label>
+    <div class="actions actions--inline">
+      <button class="btn" type="submit">Рассчитать</button>
+    </div>
+  </form>
+
+  {% if result %}
+    <div class="grid">
+      <section class="card">
+        <h2 class="subtitle">Показатели</h2>
+        <dl class="dl">
+          <div class="dl__row"><dt>Количество выполненных</dt><dd>{{ result.completed_count }}</dd></div>
+          <div class="dl__row"><dt>Среднее время выполнения</dt><dd>{{ format_duration_seconds(result.average_seconds) }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2 class="subtitle">Неисправности</h2>
+        {% if result.fault_type_counts %}
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Тип</th>
+                  <th>Количество</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for key, value in result.fault_type_counts.items() %}
+                  <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ value }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="muted">Нет данных для построения статистики.</p>
+        {% endif %}
+      </section>
+    </div>
+  {% endif %}
+{% endblock %}
+

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="title">Ошибка сервера</h1>
+  <div class="card">
+    <p>Произошла непредвиденная ошибка. Повторите попытку позже.</p>
+    <a class="btn" href="{{ url_for('tickets.list_tickets') }}">К заявкам</a>
+  </div>
+{% endblock %}
+

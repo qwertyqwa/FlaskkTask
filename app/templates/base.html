@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "Учет заявок — ООО \"Конди\"" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container header__inner">
+        <div class="brand">
+          <a class="brand__link" href="{{ url_for('tickets.list_tickets') }}">Учет заявок</a>
+        </div>
+        <nav class="nav">
+          {% if g.user %}
+            <a class="nav__link" href="{{ url_for('tickets.list_tickets') }}">Заявки</a>
+            {% if g.user["role"] in ["admin", "operator"] %}
+              <a class="nav__link" href="{{ url_for('tickets.create_ticket') }}">Создать</a>
+              <a class="nav__link" href="{{ url_for('stats.stats_view') }}">Статистика</a>
+            {% endif %}
+            <a class="nav__link" href="{{ url_for('notifications.list_notifications') }}">
+              Уведомления
+              {% if g.unread_notifications %}
+                <span class="badge" title="Непрочитанные">{{ g.unread_notifications }}</span>
+              {% endif %}
+            </a>
+            {% if g.user["role"] == "admin" %}
+              <a class="nav__link" href="{{ url_for('admin.users_list') }}">Пользователи</a>
+            {% endif %}
+          {% endif %}
+        </nav>
+        <div class="user">
+          {% if g.user %}
+            <div class="user__meta">
+              <div class="user__name">{{ g.user["full_name"] }}</div>
+              <div class="user__role">
+                {% if g.user["role"] == "admin" %}Администратор{% endif %}
+                {% if g.user["role"] == "operator" %}Оператор{% endif %}
+                {% if g.user["role"] == "specialist" %}Специалист{% endif %}
+              </div>
+            </div>
+            <form method="post" action="{{ url_for('auth.logout') }}">
+              <button class="btn btn--ghost" type="submit">Выход</button>
+            </form>
+          {% else %}
+            <a class="btn btn--ghost" href="{{ url_for('auth.login') }}">Вход</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <main class="container main">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <section class="messages" aria-label="Сообщения">
+            {% for category, message in messages %}
+              <div class="message message--{{ category }}">
+                <div class="message__title">
+                  <span class="message__icon" aria-hidden="true">
+                    {% if category == "error" %}!{% endif %}
+                    {% if category == "warning" %}!{% endif %}
+                    {% if category == "success" %}✓{% endif %}
+                    {% if category == "info" %}i{% endif %}
+                  </span>
+                  {% if category == "error" %}Ошибка{% endif %}
+                  {% if category == "warning" %}Предупреждение{% endif %}
+                  {% if category == "success" %}Успех{% endif %}
+                  {% if category == "info" %}Информация{% endif %}
+                </div>
+                <div class="message__body">{{ message }}</div>
+              </div>
+            {% endfor %}
+          </section>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <div>Сервисный центр «IT‑Сфера»</div>
+        <div class="muted">SQLite • Flask • HTML</div>
+      </div>
+    </footer>
+  </body>
+</html>

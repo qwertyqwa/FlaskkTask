@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="title-row">
+    <h1 class="title">Пользователи</h1>
+    <a class="btn btn--ghost" href="{{ url_for('tickets.list_tickets') }}">Назад</a>
+  </div>
+
+  <div class="actions">
+    <a class="btn" href="{{ url_for('admin.users_new') }}">Создать пользователя</a>
+  </div>
+
+  <div class="card">
+    {% if users %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Логин</th>
+              <th>ФИО</th>
+              <th>Роль</th>
+              <th>Активен</th>
+              <th>Создан</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td>{{ u["username"] }}</td>
+                <td>{{ u["full_name"] }}</td>
+                <td>{{ role_labels.get(u["role"], u["role"]) }}</td>
+                <td>{{ "Да" if u["is_active"] else "Нет" }}</td>
+                <td>{{ u["created_at"] }}</td>
+                <td>
+                  <a class="btn btn--small" href="{{ url_for('admin.users_edit', user_id=u['id']) }}">Изменить</a>
+                  {% if u["id"] != 1 %}
+                    <form class="inline" method="post" action="{{ url_for('admin.users_delete', user_id=u['id']) }}"
+                          onsubmit="return confirm('Удалить пользователя {{ u['username'] }}?');">
+                      <button class="btn btn--small btn--danger" type="submit">Удалить</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">Пользователей нет.</p>
+    {% endif %}
+  </div>
+{% endblock %}
+
