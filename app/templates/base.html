@@ -17,7 +17,12 @@
             <a class="nav__link" href="{{ url_for('tickets.list_tickets') }}">Заявки</a>
             {% if g.user["role"] in ["admin", "operator"] %}
               <a class="nav__link" href="{{ url_for('tickets.create_ticket') }}">Создать</a>
+            {% endif %}
+            {% if g.user["role"] in ["admin", "operator", "manager"] %}
               <a class="nav__link" href="{{ url_for('stats.stats_view') }}">Статистика</a>
+            {% endif %}
+            {% if g.user["role"] in ["admin", "manager"] %}
+              <a class="nav__link" href="{{ url_for('manager.dashboard') }}">Качество</a>
             {% endif %}
             <a class="nav__link" href="{{ url_for('notifications.list_notifications') }}">
               Уведомления
@@ -38,6 +43,7 @@
                 {% if g.user["role"] == "admin" %}Администратор{% endif %}
                 {% if g.user["role"] == "operator" %}Оператор{% endif %}
                 {% if g.user["role"] == "specialist" %}Специалист{% endif %}
+                {% if g.user["role"] == "manager" %}Менеджер по качеству{% endif %}
               </div>
             </div>
             <form method="post" action="{{ url_for('auth.logout') }}">

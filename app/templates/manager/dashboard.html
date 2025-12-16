@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1 class="title">Панель менеджера по качеству</h1>
+
+  <div class="grid">
+    <section class="card">
+      <h2 class="subtitle">Просроченные заявки</h2>
+      {% if overdue %}
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Номер</th>
+                <th>Срок</th>
+                <th>Статус</th>
+                <th>Специалист</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in overdue %}
+                <tr class="row--overdue">
+                  <td><a href="{{ url_for('tickets.view_ticket', ticket_id=t['id']) }}">{{ t["request_number"] }}</a></td>
+                  <td>{{ format_datetime(t["due_at"]) }}</td>
+                  <td><span class="pill pill--{{ t['status'] }}">{{ status_labels[t["status"]] }}</span></td>
+                  <td>{{ t["specialist_name"] or "—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="muted">Просроченных заявок нет.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2 class="subtitle">Открытые запросы помощи</h2>
+      {% if help_requests %}
+        <ul class="list">
+          {% for r in help_requests %}
+            <li class="list__item">
+              <div class="list__meta">
+                <strong>{{ r["request_number"] }}</strong>
+                • {{ r["requested_by_name"] }}
+                • {{ format_datetime(r["requested_at"]) }}
+              </div>
+              <div class="pre">{{ r["message"] }}</div>
+              <div class="actions" style="margin-top: 10px">
+                <a class="btn btn--small" href="{{ url_for('tickets.view_ticket', ticket_id=r['ticket_id']) }}">Открыть заявку</a>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Запросов помощи нет.</p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}
+

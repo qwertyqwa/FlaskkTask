@@ -342,6 +342,10 @@ body {
   color: var(--text);
 }
 
+.row--overdue td {
+  background: rgba(251, 191, 36, 0.08);
+}
+
 .pill {
   display: inline-flex;
   padding: 4px 10px;
@@ -450,4 +454,14 @@ code {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.qr {
+  width: 260px;
+  max-width: 100%;
+  height: auto;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
 }

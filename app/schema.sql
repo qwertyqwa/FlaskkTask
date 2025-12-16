@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   full_name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK(role IN ('admin', 'operator', 'specialist')),
+  role TEXT NOT NULL CHECK(role IN ('admin', 'operator', 'specialist', 'manager')),
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS tickets (
   customer_phone TEXT NOT NULL,
   status TEXT NOT NULL CHECK(status IN ('open', 'in_repair', 'waiting_parts', 'completed')),
   assigned_specialist_id INTEGER,
+  due_at TEXT,
   completed_at TEXT,
   updated_at TEXT NOT NULL,
   FOREIGN KEY (assigned_specialist_id) REFERENCES users(id) ON DELETE SET NULL
@@ -29,6 +30,60 @@ CREATE TABLE IF NOT EXISTS tickets (
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
 CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at);
 CREATE INDEX IF NOT EXISTS idx_tickets_request_number ON tickets(request_number);
+
+CREATE TABLE IF NOT EXISTS ticket_specialists (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticket_id INTEGER NOT NULL,
+  specialist_user_id INTEGER NOT NULL,
+  added_by_user_id INTEGER NOT NULL,
+  added_at TEXT NOT NULL,
+  UNIQUE(ticket_id, specialist_user_id),
+  FOREIGN KEY(ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+  FOREIGN KEY(specialist_user_id) REFERENCES users(id) ON DELETE RESTRICT,
+  FOREIGN KEY(added_by_user_id) REFERENCES users(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS ticket_due_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticket_id INTEGER NOT NULL,
+  old_due_at TEXT,
+  new_due_at TEXT NOT NULL,
+  changed_by_user_id INTEGER NOT NULL,
+  changed_at TEXT NOT NULL,
+  customer_agreed INTEGER NOT NULL DEFAULT 0,
+  comment TEXT,
+  FOREIGN KEY(ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+  FOREIGN KEY(changed_by_user_id) REFERENCES users(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS ticket_help_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticket_id INTEGER NOT NULL,
+  requested_by_user_id INTEGER NOT NULL,
+  requested_at TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN ('open', 'resolved')) DEFAULT 'open',
+  resolved_by_user_id INTEGER,
+  resolved_at TEXT,
+  resolution_comment TEXT,
+  FOREIGN KEY(ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+  FOREIGN KEY(requested_by_user_id) REFERENCES users(id) ON DELETE RESTRICT,
+  FOREIGN KEY(resolved_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_help_requests_status ON ticket_help_requests(status);
+
+CREATE TABLE IF NOT EXISTS ticket_reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticket_id INTEGER NOT NULL UNIQUE,
+  rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+  comment TEXT,
+  source TEXT NOT NULL DEFAULT 'manual',
+  recorded_by_user_id INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+  FOREIGN KEY(recorded_by_user_id) REFERENCES users(id) ON DELETE RESTRICT
+);
 
 CREATE TABLE IF NOT EXISTS status_history (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,4 +131,3 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 
 CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read);
-

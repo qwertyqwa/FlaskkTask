@@ -18,7 +18,12 @@ ROLE_LABELS: dict[str, str] = {
     "admin": "Администратор",
     "operator": "Оператор",
     "specialist": "Специалист",
+    "manager": "Менеджер по качеству",
 }
+
+FEEDBACK_FORM_URL = (
+    "https://docs.google.com/forms/d/e/1FAIpQLSdhZcExx6LSIXxk0ub55mSu-WIh23WYdGG9HY5EZhLDo7P8eA/viewform?usp=sf_link"
+)
 
 PHONE_ALLOWED = re.compile(r"^[0-9+()\-\s]{6,20}$")
 
@@ -101,4 +106,3 @@ def generate_request_number(db: sqlite3.Connection, created_at_iso: str) -> str:
 
 def normalize_search_tokens(value: str) -> Iterable[str]:
     return [token for token in re.split(r"\s+", value.strip()) if token]
-

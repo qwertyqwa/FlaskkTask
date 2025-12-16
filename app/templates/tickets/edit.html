@@ -28,6 +28,11 @@
     </label>
 
     <label class="field">
+      <span class="field__label">Срок выполнения (опционально)</span>
+      <input class="input" type="date" name="due_date" value="{{ ticket['due_at'][:10] if ticket['due_at'] else '' }}" />
+    </label>
+
+    <label class="field">
       <span class="field__label">Описание проблемы</span>
       <textarea class="input" name="problem_description" rows="5" required>{{ ticket["problem_description"] }}</textarea>
     </label>
@@ -38,4 +43,3 @@
     </div>
   </form>
 {% endblock %}
-

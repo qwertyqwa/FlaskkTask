@@ -15,4 +15,4 @@
 - `admin / admin`
 - `operator / operator`
 - `specialist / specialist`
-
+- `manager / manager`

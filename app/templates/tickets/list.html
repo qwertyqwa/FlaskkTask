@@ -20,7 +20,7 @@
       </select>
     </label>
 
-    {% if g.user["role"] in ["admin", "operator"] %}
+    {% if g.user["role"] in ["admin", "operator", "manager"] %}
       <label class="field field--inline">
         <span class="field__label">Специалист</span>
         <select class="input" name="specialist_id">
@@ -58,6 +58,7 @@
             <tr>
               <th>Номер</th>
               <th>Дата</th>
+              <th>Срок</th>
               <th>Оборудование</th>
               <th>Клиент</th>
               <th>Телефон</th>
@@ -67,9 +68,10 @@
           </thead>
           <tbody>
             {% for t in tickets %}
-              <tr>
+              <tr class="{% if t['is_overdue'] %}row--overdue{% endif %}">
                 <td><a href="{{ url_for('tickets.view_ticket', ticket_id=t['id']) }}">{{ t["request_number"] }}</a></td>
                 <td>{{ format_datetime(t["created_at"]) }}</td>
+                <td>{{ format_datetime(t["due_at"]) or "—" }}</td>
                 <td>{{ t["equipment_type"] }} / {{ t["device_model"] }}</td>
                 <td>{{ t["customer_full_name"] }}</td>
                 <td>{{ t["customer_phone"] }}</td>
@@ -90,4 +92,3 @@
     </div>
   {% endif %}
 {% endblock %}
-

@@ -9,6 +9,7 @@ from flask import url_for
 
 from app import admin
 from app import auth
+from app import manager
 from app import notifications
 from app import stats
 from app import tickets
@@ -43,6 +44,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.register_blueprint(notifications.bp)
     app.register_blueprint(stats.bp)
     app.register_blueprint(admin.bp)
+    app.register_blueprint(manager.bp)
 
     auth.register_error_handlers(app)
 

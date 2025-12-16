@@ -15,7 +15,7 @@ bp = Blueprint("stats", __name__)
 
 
 @bp.route("/stats", methods=("GET",))
-@roles_required("admin", "operator")
+@roles_required("admin", "operator", "manager")
 def stats_view():
     date_from = request.args.get("date_from", "").strip()
     date_to = request.args.get("date_to", "").strip()
@@ -73,4 +73,3 @@ def _fetch_completed(date_from_iso: str, date_to_iso: str) -> list[dict]:
         (date_from_iso, date_to_iso),
     ).fetchall()
     return [dict(row) for row in rows]
-

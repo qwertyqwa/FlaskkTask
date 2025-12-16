@@ -30,6 +30,12 @@
     </label>
 
     <label class="field">
+      <span class="field__label">Срок выполнения (опционально)</span>
+      <input class="input" type="date" name="due_date" value="{{ form.get('due_date', '') }}" />
+      <span class="hint">Если заполнено, система использует конец указанного дня как срок выполнения.</span>
+    </label>
+
+    <label class="field">
       <span class="field__label">Ответственный специалист (опционально)</span>
       <select class="input" name="assigned_specialist_id">
         <option value="">Не назначать</option>
@@ -47,4 +53,3 @@
     </div>
   </form>
 {% endblock %}
-

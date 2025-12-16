@@ -11,12 +11,33 @@
       <dl class="dl">
         <div class="dl__row"><dt>Дата добавления</dt><dd>{{ format_datetime(ticket["created_at"]) }}</dd></div>
         <div class="dl__row"><dt>Статус</dt><dd><span class="pill pill--{{ ticket['status'] }}">{{ status_labels[ticket["status"]] }}</span></dd></div>
+        <div class="dl__row">
+          <dt>Срок выполнения</dt>
+          <dd>
+            {{ format_datetime(ticket["due_at"]) or "—" }}
+            {% if is_overdue %}
+              <span class="pill pill--waiting_parts">Просрочено</span>
+            {% endif %}
+          </dd>
+        </div>
         <div class="dl__row"><dt>Тип оборудования</dt><dd>{{ ticket["equipment_type"] }}</dd></div>
         <div class="dl__row"><dt>Модель</dt><dd>{{ ticket["device_model"] }}</dd></div>
         <div class="dl__row"><dt>Описание проблемы</dt><dd class="pre">{{ ticket["problem_description"] }}</dd></div>
         <div class="dl__row"><dt>ФИО заказчика</dt><dd>{{ ticket["customer_full_name"] }}</dd></div>
         <div class="dl__row"><dt>Телефон</dt><dd>{{ ticket["customer_phone"] }}</dd></div>
         <div class="dl__row"><dt>Ответственный</dt><dd>{{ ticket["specialist_name"] or "—" }}</dd></div>
+        <div class="dl__row">
+          <dt>Привлеченные специалисты</dt>
+          <dd>
+            {% if assistants %}
+              {% for a in assistants %}
+                {{ a["full_name"] }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+            {% else %}
+              —
+            {% endif %}
+          </dd>
+        </div>
         <div class="dl__row"><dt>Дата завершения</dt><dd>{{ format_datetime(ticket["completed_at"]) or "—" }}</dd></div>
       </dl>
 
@@ -33,10 +54,10 @@
       {% endif %}
     </section>
 
-    {% if can_work %}
-      <section class="card">
-        <h2 class="subtitle">Работа по заявке</h2>
+    <section class="card">
+      <h2 class="subtitle">Действия</h2>
 
+      {% if can_change_status %}
         <form class="form form--stack" method="post" action="{{ url_for('tickets.update_status', ticket_id=ticket['id']) }}">
           <label class="field">
             <span class="field__label">Изменить статус</span>
@@ -52,19 +73,19 @@
           </label>
           <button class="btn" type="submit">Сохранить статус</button>
         </form>
-
         <hr class="hr" />
+      {% endif %}
 
-        <form class="form form--stack" method="post" action="{{ url_for('tickets.add_comment', ticket_id=ticket['id']) }}">
-          <label class="field">
-            <span class="field__label">Комментарий</span>
-            <textarea class="input" name="body" rows="3" placeholder="Комментарий специалиста/оператора" required></textarea>
-          </label>
-          <button class="btn" type="submit">Добавить комментарий</button>
-        </form>
+      <form class="form form--stack" method="post" action="{{ url_for('tickets.add_comment', ticket_id=ticket['id']) }}">
+        <label class="field">
+          <span class="field__label">Комментарий</span>
+          <textarea class="input" name="body" rows="3" placeholder="Комментарий по заявке" required></textarea>
+        </label>
+        <button class="btn" type="submit">Добавить комментарий</button>
+      </form>
 
+      {% if can_add_parts %}
         <hr class="hr" />
-
         <form class="form form--stack" method="post" action="{{ url_for('tickets.add_part', ticket_id=ticket['id']) }}">
           <label class="field">
             <span class="field__label">Комплектующая</span>
@@ -76,9 +97,112 @@
           </label>
           <button class="btn" type="submit">Зафиксировать комплектующую</button>
         </form>
-      </section>
-    {% endif %}
+      {% endif %}
+
+      {% if can_request_help %}
+        <hr class="hr" />
+        <form class="form form--stack" method="post" action="{{ url_for('tickets.request_help', ticket_id=ticket['id']) }}">
+          <label class="field">
+            <span class="field__label">Запрос помощи менеджера</span>
+            <textarea class="input" name="message" rows="3" placeholder="Опишите проблему и почему нужна помощь" required></textarea>
+          </label>
+          <button class="btn" type="submit">Отправить запрос</button>
+        </form>
+      {% endif %}
+
+      {% if can_manager_actions %}
+        <hr class="hr" />
+        <h3 class="subtitle" style="margin-top: 0">Инструменты менеджера</h3>
+
+        <form class="form form--stack" method="post" action="{{ url_for('tickets.add_assistant', ticket_id=ticket['id']) }}">
+          <label class="field">
+            <span class="field__label">Привлечь специалиста</span>
+            <select class="input" name="specialist_user_id" required>
+              <option value="">Выберите специалиста</option>
+              {% for sp in specialists %}
+                {% if sp["id"] != ticket["assigned_specialist_id"] and sp["id"] not in assistant_ids %}
+                  <option value="{{ sp['id'] }}">{{ sp["full_name"] }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </label>
+          <button class="btn" type="submit">Добавить</button>
+        </form>
+
+        {% if assistants %}
+          <div class="actions" style="margin-top: 10px">
+            {% for a in assistants %}
+              <form method="post" action="{{ url_for('tickets.remove_assistant', ticket_id=ticket['id'], specialist_user_id=a['id']) }}"
+                    onsubmit="return confirm('Убрать специалиста {{ a['full_name'] }} из привлеченных?');">
+                <button class="btn btn--ghost btn--small" type="submit">Убрать: {{ a["full_name"] }}</button>
+              </form>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <hr class="hr" />
+
+        <form class="form form--stack" method="post" action="{{ url_for('tickets.extend_due_date', ticket_id=ticket['id']) }}">
+          <label class="field">
+            <span class="field__label">Продлить срок выполнения</span>
+            <input class="input" type="date" name="due_date" value="{{ ticket['due_at'][:10] if ticket['due_at'] else '' }}" required />
+            <span class="hint">Требуется согласование заказчика.</span>
+          </label>
+          <label class="field">
+            <span class="field__label">Комментарий (опционально)</span>
+            <input class="input" name="comment" placeholder="Например: ожидание поставки комплектующих" />
+          </label>
+          <label class="field" style="grid-template-columns: auto 1fr; align-items: center">
+            <input type="checkbox" name="customer_agreed" required />
+            <span class="field__label">Согласовано с заказчиком</span>
+          </label>
+          <button class="btn" type="submit">Обновить срок</button>
+        </form>
+
+        <hr class="hr" />
+
+        <form class="form form--stack" method="post" action="{{ url_for('tickets.record_review', ticket_id=ticket['id']) }}">
+          <label class="field">
+            <span class="field__label">Записать отзыв (1–5)</span>
+            <select class="input" name="rating" required>
+              <option value="">Выберите оценку</option>
+              {% for n in [1, 2, 3, 4, 5] %}
+                <option value="{{ n }}" {% if review and review['rating'] == n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="field">
+            <span class="field__label">Комментарий (опционально)</span>
+            <textarea class="input" name="comment" rows="2" placeholder="Коротко опишите отзыв">{{ review['comment'] if review else '' }}</textarea>
+          </label>
+          <button class="btn" type="submit">Сохранить отзыв</button>
+        </form>
+      {% endif %}
+    </section>
   </div>
+
+  <section class="card">
+    <h2 class="subtitle">Оценка качества (QR‑код)</h2>
+    <p class="muted">Клиент может отсканировать QR‑код и перейти к форме опроса.</p>
+    <div class="actions">
+      <a class="btn btn--ghost" href="{{ feedback_url }}" target="_blank" rel="noreferrer">Открыть форму</a>
+      <a class="btn btn--ghost" href="{{ url_for('tickets.ticket_qr', ticket_id=ticket['id']) }}" target="_blank" rel="noreferrer">Открыть QR</a>
+    </div>
+    {% if qr_data_uri %}
+      <div style="margin-top: 12px">
+        <img class="qr" src="{{ qr_data_uri }}" alt="QR‑код формы обратной связи" />
+      </div>
+    {% else %}
+      <p class="muted">QR‑код недоступен (библиотека segno не установлена)</p>
+    {% endif %}
+    {% if review %}
+      <hr class="hr" />
+      <div class="muted">Зафиксированный отзыв: {{ review["rating"] }}/5 • {{ review["recorded_by_name"] }} • {{ format_datetime(review["created_at"]) }}</div>
+      {% if review["comment"] %}
+        <div class="pre" style="margin-top: 8px">{{ review["comment"] }}</div>
+      {% endif %}
+    {% endif %}
+  </section>
 
   <section class="card">
     <h2 class="subtitle">Комментарии</h2>
@@ -157,6 +281,79 @@
       </div>
     {% else %}
       <p class="muted">История пуста.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2 class="subtitle">История сроков</h2>
+    {% if due_history %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Пользователь</th>
+              <th>Было</th>
+              <th>Стало</th>
+              <th>Согласовано</th>
+              <th>Комментарий</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in due_history %}
+              <tr>
+                <td>{{ format_datetime(h["changed_at"]) }}</td>
+                <td>{{ h["full_name"] }}</td>
+                <td>{{ format_datetime(h["old_due_at"]) or "—" }}</td>
+                <td>{{ format_datetime(h["new_due_at"]) }}</td>
+                <td>{% if h["customer_agreed"] %}Да{% else %}Нет{% endif %}</td>
+                <td>{{ h["comment"] or "—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">История сроков пуста.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2 class="subtitle">Запросы помощи</h2>
+    {% if help_requests %}
+      <ul class="list">
+        {% for r in help_requests %}
+          <li class="list__item">
+            <div class="list__meta">
+              <strong>{{ r["requested_by_name"] }}</strong>
+              • {{ format_datetime(r["requested_at"]) }}
+              • {% if r["status"] == "open" %}Открыт{% else %}Закрыт{% endif %}
+            </div>
+            <div class="pre">{{ r["message"] }}</div>
+            {% if r["status"] != "open" %}
+              <div class="muted" style="margin-top: 8px">
+                Закрыл: {{ r["resolved_by_name"] or "—" }} • {{ format_datetime(r["resolved_at"]) or "—" }}
+              </div>
+              {% if r["resolution_comment"] %}
+                <div class="pre" style="margin-top: 8px">{{ r["resolution_comment"] }}</div>
+              {% endif %}
+            {% endif %}
+
+            {% if can_manager_actions and r["status"] == "open" %}
+              <hr class="hr" />
+              <form class="form form--stack" method="post" action="{{ url_for('tickets.resolve_help', ticket_id=ticket['id'], help_id=r['id']) }}">
+                <label class="field">
+                  <span class="field__label">Комментарий к решению (опционально)</span>
+                  <textarea class="input" name="resolution_comment" rows="2" placeholder="Что делать специалисту"></textarea>
+                </label>
+                <button class="btn btn--small" type="submit">Закрыть запрос</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Запросов помощи нет.</p>
     {% endif %}
   </section>
 {% endblock %}
