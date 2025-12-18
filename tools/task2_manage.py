@@ -435,9 +435,13 @@ def parse_args() -> argparse.Namespace:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("init", help="Create empty DB using task2/schema.sql")
+    sub.add_parser("reset", help="Delete DB file and create empty DB using task2/schema.sql")
 
     p_import = sub.add_parser("import", help="Import CSV data from task2/import/")
     p_import.add_argument("--path", default=str(IMPORT_DIR), help="Path to import directory")
+
+    p_recreate = sub.add_parser("recreate", help="Reset DB and import CSV data")
+    p_recreate.add_argument("--path", default=str(IMPORT_DIR), help="Path to import directory")
 
     p_reports = sub.add_parser("reports", help="Run SQL queries and write Markdown reports")
     p_reports.add_argument("--date-from", default="1900-01-01 00:00:00", help="Period start (ISO)")
@@ -460,10 +464,26 @@ def main() -> None:
         print(f"OK: DB initialized: {db_path}")
         return
 
+    if args.cmd == "reset":
+        if db_path.exists():
+            db_path.unlink()
+        init_db(db_path)
+        print(f"OK: DB reset: {db_path}")
+        return
+
     if args.cmd == "import":
         import_path = Path(args.path)
         import_data(db_path, import_path)
         print(f"OK: Data imported from: {import_path}")
+        return
+
+    if args.cmd == "recreate":
+        if db_path.exists():
+            db_path.unlink()
+        init_db(db_path)
+        import_path = Path(args.path)
+        import_data(db_path, import_path)
+        print(f"OK: DB recreated and imported from: {import_path}")
         return
 
     if args.cmd == "reports":
